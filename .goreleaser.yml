@@ -4,11 +4,6 @@ release:
     owner: amir20
     name: sha-miner
   name_template: '{{.Tag}}'
-brew:
-  commit_author:
-    name: goreleaserbot
-    email: goreleaser@carlosbecker.com
-  install: bin.install "sha-miner"
 builds:
 - goos:
   - linux
@@ -38,3 +33,11 @@ snapshot:
   name_template: SNAPSHOT-{{ .Commit }}
 checksum:
   name_template: '{{ .ProjectName }}_{{ .Version }}_checksums.txt'
+
+fpm:
+  maintainer: Amir Raminfar <findamir@gmail.com>
+  description: Test for understanding how mining works.
+  license: Apache 2.0
+  formats:
+    - deb
+    - rpm
