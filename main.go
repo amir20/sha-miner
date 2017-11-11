@@ -62,7 +62,7 @@ func mine(start uint64, bytes []byte, found chan<- uint64, abort <-chan struct{}
 	for {
 		select {
 		case <-abort:
-			break
+			return
 
 		default:
 			binary.LittleEndian.PutUint64(buffer[total:], nonce)
@@ -71,7 +71,7 @@ func mine(start uint64, bytes []byte, found chan<- uint64, abort <-chan struct{}
 
 			if value.Cmp(threshold) <= 0 {
 				found <- nonce
-				break
+				return
 			}
 
 			nonce++
@@ -79,7 +79,6 @@ func mine(start uint64, bytes []byte, found chan<- uint64, abort <-chan struct{}
 			if attempt%(1<<16) == 0 {
 				meter.Mark(attempt)
 				attempt = 0
-
 			}
 		}
 	}
