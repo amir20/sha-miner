@@ -38,4 +38,5 @@ fpm:
   description: Test for understanding how mining works.
   license: Apache 2.0
   formats:
-    - deb    
+    - deb
+    - rpm
