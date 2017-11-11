@@ -1,45 +1,54 @@
 package main
 
 import (
-	"bytes"
 	"crypto/sha256"
 	"encoding/binary"
 	"math/big"
-	"os"
 	"runtime"
 	metrics2 "github.com/rcrowley/go-metrics"
 	"fmt"
+	flag "github.com/spf13/pflag"
+	"time"
 )
 
 const (
-	maxUint64  = ^uint64(0)
-	difficulty = 100000000
+	maxUint64         = ^uint64(0)
+	defaultDifficulty = 100000000
+	defaultMessage    = "Hello world."
 )
 
 var (
 	maxUint256 = new(big.Int).Exp(big.NewInt(2), big.NewInt(256), big.NewInt(0))
-	threshold  = new(big.Int).Div(maxUint256, big.NewInt(difficulty))
+	threshold  *big.Int
 )
 
 func main() {
+	difficulty := flag.Uint64P("difficulty", "d", defaultDifficulty, "Difficulty value to use for mining")
+	message := flag.StringP("message", "m", defaultMessage, "Message to compute the hash")
+	threads := flag.IntP("threads", "t", runtime.NumCPU(), "Total number of threads to use. Defaults to number of CPUs")
+
+	flag.Parse()
+
+	threshold = new(big.Int).Div(maxUint256, big.NewInt(int64(*difficulty)))
+	data := []byte(*message)
+
 	abort := make(chan struct{})
 	found := make(chan uint64)
 	defer close(found)
 
-	data := argToBytes()
-	delta := maxUint64 / uint64(runtime.NumCPU())
-
-	metrics := metrics2.NewMeter()
-	for i := 0; i < runtime.NumCPU(); i++ {
+	delta := maxUint64 / uint64(*threads)
+	meter := metrics2.NewMeter()
+	for i := 0; i < *threads; i++ {
 		start := uint64(i) * delta
-		go mine(start, data, found, abort, metrics)
+		go mine(start, data, found, abort, meter)
 	}
+
+	go status(abort, meter)
 
 	select {
 	case result := <-found:
 		close(abort)
-		fmt.Println("Found result", result)
-		fmt.Printf("Effective Hashrate is %.2f MH/s\n", metrics.Rate1()/1000000)
+		fmt.Printf("Found nonce %d with hashrate of %.2f MH/s\n", result, meter.Rate1()/1000000)
 	}
 }
 
@@ -67,7 +76,7 @@ func mine(start uint64, bytes []byte, found chan<- uint64, abort <-chan struct{}
 
 			nonce++
 			attempt++
-			if attempt % (1<<16) == 0 {
+			if attempt%(1<<16) == 0 {
 				meter.Mark(attempt)
 				attempt = 0
 
@@ -76,11 +85,15 @@ func mine(start uint64, bytes []byte, found chan<- uint64, abort <-chan struct{}
 	}
 }
 
-func argToBytes() []byte {
-	var buffer bytes.Buffer
-	for i := 1; i < len(os.Args); i++ {
-		buffer.WriteString(os.Args[i])
+func status(abort <-chan struct{}, meter metrics2.Meter) {
+	ticker := time.NewTicker(5 * time.Second)
+	for {
+		select {
+		case <-ticker.C:
+			fmt.Printf("Effective Hashrate is %.2f MH/s\n", meter.Rate1()/1000000)
+		case <-abort:
+			ticker.Stop()
+			return
+		}
 	}
-
-	return buffer.Bytes()
 }
