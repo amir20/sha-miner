@@ -2,7 +2,10 @@
 This project was created to understand how cryto-currency miners work. For a while, I have understood at a high-level what miners do but the best way for me to really understand was to implement it myself.
 
 # How does the project work 
-I read the source code for [geth](https://github.com/ethereum/go-ethereum) to understand how `difficulty` is implemented and how `hashrate` was computed. This example miner uses all of your CPU cores "mine" a nonce which is below the threshold. 
+I read the source code for [geth](https://github.com/ethereum/go-ethereum) to understand how `difficulty` is implemented and how `hashrate` was computed. This example miner uses all of your CPU cores to "mine" a nonce where `hash(nonce + message) <= threshold`. I use sha-256. 
+
+# How is this different than the real implementation 
+There are two big differences. Real miners start with a random number to increase the chances of one miner mining a block. Also, instead of using bytes of a string, the bytes of the currently block that is being mined will be used. 
 
 # Usage 
 
@@ -18,7 +21,7 @@ Usage of sha-miner:
 For the latest binaries, download them [here](https://github.com/amir20/sha-miner/releases).
 
 # Installation from source
-You need to have `pflags` and `go-metrics`. You can install them by doing 
+You need to have `pflag` and `go-metrics`. You can install them by doing 
 
 ```
 go get -u github.com/rcrowley/go-metrics
