@@ -5,7 +5,7 @@ This project was created to understand how cryto-currency miners work. For a whi
 I read the source code for [geth](https://github.com/ethereum/go-ethereum) to understand how `difficulty` is implemented and how `hashrate` was computed. This example miner uses all of your CPU cores to "mine" a nonce where `hash(nonce + message) <= threshold`. I use sha-256. 
 
 # How is this different than the real implementation 
-There are two big differences. Real miners start with a random number to increase the chances of one miner mining a block. Also, instead of using bytes of a string, the bytes of the currently block that is being mined will be used. 
+Real miners start with a random number to increase the chances of one miner mining a block. And, instead of using bytes of a string, the bytes of the currently block that is being mined will be used. Finally, this example uses `sha-256` while etherum uses `KECCAK-256`.
 
 # Does it use GPU?
 I wish. I haven't figured out how to leverage GPU with Go yet. Geth doesn't support [GPU officially](https://ethereum.gitbooks.io/frontier-guide/content/gpu.html) but they are working on it. The C++ implementation does support GPU. 
