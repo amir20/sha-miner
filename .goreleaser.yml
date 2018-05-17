@@ -33,7 +33,7 @@ snapshot:
   name_template: SNAPSHOT-{{ .Commit }}
 checksum:
   name_template: '{{ .ProjectName }}_{{ .Version }}_checksums.txt'
-fpm:
+nfpm:
   maintainer: Amir Raminfar <findamir@gmail.com>
   description: Test for understanding how mining works.
   license: Apache 2.0
