@@ -5,11 +5,11 @@ package main
 import (
 	"crypto/sha256"
 	"encoding/binary"
+	"fmt"
+	metrics2 "github.com/rcrowley/go-metrics"
+	flag "github.com/spf13/pflag"
 	"math/big"
 	"runtime"
-	metrics2 "github.com/rcrowley/go-metrics"
-	"fmt"
-	flag "github.com/spf13/pflag"
 	"time"
 )
 
@@ -71,7 +71,6 @@ func mine(start uint64, bytes []byte, found chan<- uint64, abort <-chan struct{}
 
 	nonce := start
 	attempt := int64(0)
-
 
 	for {
 		select {
